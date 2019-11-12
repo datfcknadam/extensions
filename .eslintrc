@@ -1,0 +1,35 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true
+  },
+  "parserOptions": {
+    "parser": "babel-eslint"
+  },
+  "extends": [
+    "airbnb-base",
+    "plugin:vue/essential"
+  ],
+  "plugins": [
+    "vue",
+  ],
+  "rules": {
+    "no-param-reassign": [2, {
+      "props": false
+    }],
+    "no-underscore-dangle": [1, {
+      "allow": ["_id"]
+    }],
+    "no-restricted-syntax": 0,
+    "no-restricted-globals": 0
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"]
+      }
+    }
+  },
+
+}
