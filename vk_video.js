@@ -1,39 +1,44 @@
 ﻿window.onload = function () {
   // eslint-disable-next-line prefer-const
-
   const newTimecode = (play) => {
-    const id = play.baseURI;
-    const time = play.currentTime;
-    const obj = {
-      data: [{
+    if ('baseURI' in play && 'currentTime' in play) {
+      const id = play.baseURI;
+      const time = play.currentTime;
+      const obj = {
         id,
         time,
-      }],
-    };
-    localStorage.setItem('timecode_player', JSON.stringify(obj));
+      };
+      window.jsonTimecodePlayer.push(obj);
+    }
   };
   const createTimecode = (play) => {
-    const timecodePlayer = localStorage.getItem('timecode_player').data;
-
     const id = play.baseURI;
     const time = play.currentTime;
     const obj = {
-      data: [{
-        id,
-        time,
-      }],
+      id,
+      time,
     };
-    timecodePlayer.push(JSON.stringify(obj));
+    console.log(obj);
+    window.jsonTimecodePlayer.push(obj);
   };
 
+  function ViewContinue() {
+    const windowVideo = document.getElementsByClassName('videoplayer_media')[0];
+    const windowNotification = document.createElement('div');
+    windowVideo.append(windowNotification);
+  }
+
   function checkTimecode() {
+    const timecodePlayer = localStorage.getItem('timecode_player');
+    window.jsonTimecodePlayer = JSON.parse(timecodePlayer) || [];
+
     const play = document.getElementsByClassName('videoplayer_media_provider')[0];
-    const timecodePlayer = localStorage.getItem('timecode_player').data;
-    if (timecodePlayer) {
+    if (window.jsonTimecodePlayer) {
       if (play && 'baseURI' in play) {
-        const findID = timecodePlayer.findIndex((x) => x.id === play.baseURI);
-        if (findID) {
-          timecodePlayer[findID].time = play.currentTime;
+        const findID = window.jsonTimecodePlayer.findIndex((x) => x.id === play.baseURI);
+        if (findID !== -1) {
+          ViewContinue();
+          window.jsonTimecodePlayer[findID].time = play.currentTime;
         } else {
           createTimecode(play);
         }
@@ -41,9 +46,8 @@
     } else {
       newTimecode(play);
     }
+    localStorage.setItem('timecode_player', JSON.stringify(window.jsonTimecodePlayer));
   }
-
-
   const observer = new MutationObserver(checkTimecode);
 
   observer.observe(document.documentElement, {
