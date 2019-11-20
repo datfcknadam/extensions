@@ -18,26 +18,26 @@
       id,
       time,
     };
-    console.log(obj);
     window.jsonTimecodePlayer.push(obj);
   };
 
-  function ViewContinue() {
-    const windowVideo = document.getElementsByClassName('videoplayer_media')[0];
-    const windowNotification = document.createElement('div');
-    windowVideo.append(windowNotification);
+  function ViewContinue(play) {
+    // todo Add obs.dis and check new added video
+    play.pause();
+    // eslint-disable-next-line no-param-reassign
+    play.style.filter = 'blur(10px)';
   }
 
   function checkTimecode() {
     const timecodePlayer = localStorage.getItem('timecode_player');
     window.jsonTimecodePlayer = JSON.parse(timecodePlayer) || [];
-
     const play = document.getElementsByClassName('videoplayer_media_provider')[0];
+
     if (window.jsonTimecodePlayer) {
       if (play && 'baseURI' in play) {
         const findID = window.jsonTimecodePlayer.findIndex((x) => x.id === play.baseURI);
         if (findID !== -1) {
-          ViewContinue();
+          ViewContinue(play);
           window.jsonTimecodePlayer[findID].time = play.currentTime;
         } else {
           createTimecode(play);
@@ -46,16 +46,23 @@
     } else {
       newTimecode(play);
     }
-    localStorage.setItem('timecode_player', JSON.stringify(window.jsonTimecodePlayer));
+    return localStorage.setItem('timecode_player', JSON.stringify(window.jsonTimecodePlayer));
   }
-  const observer = new MutationObserver(checkTimecode);
 
-  observer.observe(document.documentElement, {
-    attributes: true,
-    characterData: true,
-    childList: true,
-    subtree: true,
-    attributeOldValue: true,
-    characterDataOldValue: true,
-  });
+  const that = this;
+  that.interval = setInterval(() => {
+    const target = document.getElementsByClassName('videoplayer_media_provider')[0];
+    if (target) {
+      window.observer = new MutationObserver(checkTimecode);
+      window.observer.observe(document.documentElement, {
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true,
+        attributeOldValue: true,
+        characterDataOldValue: true,
+      });
+      clearInterval(that.interval);
+    }
+  }, 1000);
 };
